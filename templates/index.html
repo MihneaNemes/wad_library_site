@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('/templates-image/background.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input, select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-edit {
+            background: #ffc107;
+            color: #333;
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        
+        .btn-edit:hover {
+            background: #e0a800;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 18px;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-returned {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-overdue {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Library Management System</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('books')">Books</button>
+            <button class="tab" onclick="showTab('borrowers')">Borrowers</button>
+            <button class="tab" onclick="showTab('loans')">Loans</button>
+        </div>
+        
+        <!-- BOOKS TAB -->
+        <div id="books" class="tab-content active">
+            <div class="form-section">
+                <h2>Add/Edit Book</h2>
+                <form id="bookForm">
+                    <input type="hidden" id="bookId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Title *</label>
+                            <input type="text" id="bookTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Author *</label>
+                            <input type="text" id="bookAuthor" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Book</button>
+                    <button type="button" class="btn btn-success" onclick="clearBookForm()" style="display: none;" id="cancelBookEdit">Cancel Edit</button>
+                </form>
+            </div>
+            
+            <h2>Books List</h2>
+            <table id="booksTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- BORROWERS TAB -->
+        <div id="borrowers" class="tab-content">
+            <div class="form-section">
+                <h2>Add/Edit Borrower</h2>
+                <form id="borrowerForm">
+                    <input type="hidden" id="borrowerId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Name *</label>
+                            <input type="text" id="borrowerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="borrowerEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone *</label>
+                            <input type="tel" id="borrowerPhone" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Borrower</button>
+                    <button type="button" class="btn btn-success" onclick="clearBorrowerForm()" style="display: none;" id="cancelBorrowerEdit">Cancel Edit</button>
+                </form>
+            </div>
+            
+            <h2>Borrowers List</h2>
+            <table id="borrowersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- LOANS TAB -->
+        <div id="loans" class="tab-content">
+            <div class="form-section">
+                <h2>Add/Edit Loan</h2>
+                <form id="loanForm">
+                    <input type="hidden" id="loanId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Book *</label>
+                            <select id="loanBook" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Borrower *</label>
+                            <select id="loanBorrower" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Due Date *</label>
+                            <input type="date" id="loanDueDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="loanStatus">
+                                <option value="Active">Active</option>
+                                <option value="Returned">Returned</option>
+                                <option value="Overdue">Overdue</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Return Date</label>
+                            <input type="date" id="loanReturnDate">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Loan</button>
+                    <button type="button" class="btn btn-success" onclick="clearLoanForm()" style="display: none;" id="cancelLoanEdit">Cancel Edit</button>
+                </form>
+            </div>
+            
+            <h2>Loans List</h2>
+            <table id="loansTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Book</th>
+                        <th>Borrower</th>
+                        <th>Due Date</th>
+                        <th>Return Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        
+        let books = [];
+        let borrowers = [];
+        let loans = [];
+        
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'loans') {
+                populateLoanDropdowns();
+            }
+        }
+        
+        // BOOKS 
+        async function loadBooks() {
+            const res = await fetch(`${API_URL}/books`);
+            books = await res.json();
+            renderBooks();
+        }
+        
+        function renderBooks() {
+            const tbody = document.querySelector('#booksTable tbody');
+            if (books.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No books available</td></tr>';
+                return;
+            }
+            tbody.innerHTML = books.map(b => `
+                <tr>
+                    <td>${b.id}</td>
+                    <td>${b.title}</td>
+                    <td>${b.author}</td>
+                    <td>${b.genre || ''}</td>
+                    <td>${b.isbn || ''}</td>
+                    <td class="actions">
+                        <button class="btn btn-edit" onclick="editBook(${b.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteBook(${b.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        document.getElementById('bookForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('bookId').value;
+            const data = {
+                title: document.getElementById('bookTitle').value,
+                author: document.getElementById('bookAuthor').value
+            };
+            
+            if (id) {
+                await fetch(`${API_URL}/books/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+            } else {
+                await fetch(`${API_URL}/books`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+            }
+            
+            clearBookForm();
+            loadBooks();
+        });
+        
+        function editBook(id) {
+            const book = books.find(b => b.id === id);
+            document.getElementById('bookId').value = book.id;
+            document.getElementById('bookTitle').value = book.title;
+            document.getElementById('bookAuthor').value = book.author;
+            if (document.getElementById('bookGenre')) document.getElementById('bookGenre').value = book.genre || '';
+            if (document.getElementById('bookISBN')) document.getElementById('bookISBN').value = book.isbn || '';
+            document.querySelector('#bookForm button[type="submit"]').textContent = 'Update Book';
+            document.getElementById('cancelBookEdit').style.display = 'inline-block';
+        }
+        
+        async function deleteBook(id) {
+            if (confirm('Delete this book?')) {
+                await fetch(`${API_URL}/books/${id}`, {method: 'DELETE'});
+                loadBooks();
+            }
+        }
+        
+        function clearBookForm() {
+            document.getElementById('bookForm').reset();
+            document.getElementById('bookId').value = '';
+            document.querySelector('#bookForm button[type="submit"]').textContent = 'Add Book';
+            document.getElementById('cancelBookEdit').style.display = 'none';
+        }
+        
+        // BORROWERS
+        async function loadBorrowers() {
+            const res = await fetch(`${API_URL}/borrowers`);
+            borrowers = await res.json();
+            renderBorrowers();
+        }
+        
+        function renderBorrowers() {
+            const tbody = document.querySelector('#borrowersTable tbody');
+            if (borrowers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No borrowers available</td></tr>';
+                return;
+            }
+            tbody.innerHTML = borrowers.map(b => `
+                <tr>
+                    <td>${b.id}</td>
+                    <td>${b.name}</td>
+                    <td>${b.email}</td>
+                    <td>${b.phone}</td>
+                    <td class="actions">
+                        <button class="btn btn-edit" onclick="editBorrower(${b.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteBorrower(${b.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        document.getElementById('borrowerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('borrowerId').value;
+            const data = {
+                name: document.getElementById('borrowerName').value,
+                email: document.getElementById('borrowerEmail').value,
+                phone: document.getElementById('borrowerPhone').value
+            };
+            
+            if (id) {
+                await fetch(`${API_URL}/borrowers/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+            } else {
+                await fetch(`${API_URL}/borrowers`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+            }
+            
+            clearBorrowerForm();
+            loadBorrowers();
+        });
+        
+        function editBorrower(id) {
+            const borrower = borrowers.find(b => b.id === id);
+            document.getElementById('borrowerId').value = borrower.id;
+            document.getElementById('borrowerName').value = borrower.name;
+            document.getElementById('borrowerEmail').value = borrower.email;
+            document.getElementById('borrowerPhone').value = borrower.phone;
+            document.querySelector('#borrowerForm button[type="submit"]').textContent = 'Update Borrower';
+            document.getElementById('cancelBorrowerEdit').style.display = 'inline-block';
+        }
+        
+        async function deleteBorrower(id) {
+            if (confirm('Delete this borrower?')) {
+                await fetch(`${API_URL}/borrowers/${id}`, {method: 'DELETE'});
+                loadBorrowers();
+            }
+        }
+        
+        function clearBorrowerForm() {
+            document.getElementById('borrowerForm').reset();
+            document.getElementById('borrowerId').value = '';
+            document.querySelector('#borrowerForm button[type="submit"]').textContent = 'Add Borrower';
+            document.getElementById('cancelBorrowerEdit').style.display = 'none';
+        }
+        
+        //LOANS 
+        async function loadLoans() {
+            const res = await fetch(`${API_URL}/loans`);
+            loans = await res.json();
+            renderLoans();
+        }
+        
+        function renderLoans() {
+            const tbody = document.querySelector('#loansTable tbody');
+            if (loans.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No loans available</td></tr>';
+                return;
+            }
+            tbody.innerHTML = loans.map(l => {
+                const book = books.find(b => b.id === l.book_id);
+                const borrower = borrowers.find(b => b.id === l.borrower_id);
+
+                let statusText, statusClass;
+                if (l.status) {
+                    statusText = l.status;
+                    statusClass = String(l.status).toLowerCase();
+                } else {
+                    const s = getStatus(l.due_date, l.return_date);
+                    statusText = s.text;
+                    statusClass = s.class;
+                }
+
+                return `
+                <tr>
+                    <td>${l.id}</td>
+                    <td>${book ? book.title : 'Unknown'}</td>
+                    <td>${borrower ? borrower.name : 'Unknown'}</td>
+                    <td>${l.due_date}</td>
+                    <td>${l.return_date || 'Not returned'}</td>
+                    <td><span class="status-badge status-${statusClass}">${statusText}</span></td>
+                    <td class="actions">
+                        <button class="btn btn-edit" onclick="editLoan(${l.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteLoan(${l.id})">Delete</button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+        
+        function getStatus(dueDate, returnDate) {
+            if (returnDate) return { text: 'Returned', class: 'returned' };
+            const today = new Date().toISOString().split('T')[0];
+            if (dueDate < today) return { text: 'Overdue', class: 'overdue' };
+            return { text: 'Active', class: 'active' };
+        }
+        
+        function populateLoanDropdowns() {
+            const bookSelect = document.getElementById('loanBook');
+            const borrowerSelect = document.getElementById('loanBorrower');
+            
+            bookSelect.innerHTML = '<option value="">Select a book</option>' +
+                books.map(b => `<option value="${b.id}">${b.title}</option>`).join('');
+            
+            borrowerSelect.innerHTML = '<option value="">Select a borrower</option>' +
+                borrowers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+        }
+        
+        document.getElementById('loanForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('loanId').value;
+            const data = {
+                book_id: parseInt(document.getElementById('loanBook').value),
+                borrower_id: parseInt(document.getElementById('loanBorrower').value),
+                due_date: document.getElementById('loanDueDate').value,
+                return_date: document.getElementById('loanReturnDate').value || null,
+                status: document.getElementById('loanStatus') ? document.getElementById('loanStatus').value : undefined
+            };
+            
+            if (id) {
+                await fetch(`${API_URL}/loans/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+            } else {
+                await fetch(`${API_URL}/loans`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+            }
+            
+            clearLoanForm();
+            loadLoans();
+        });
+        
+        function editLoan(id) {
+            const loan = loans.find(l => l.id === id);
+            document.getElementById('loanId').value = loan.id;
+            document.getElementById('loanBook').value = loan.book_id;
+            document.getElementById('loanBorrower').value = loan.borrower_id;
+            document.getElementById('loanDueDate').value = loan.due_date;
+            document.getElementById('loanReturnDate').value = loan.return_date || '';
+            if (document.getElementById('loanStatus')) document.getElementById('loanStatus').value = loan.status || 'Active';
+            document.querySelector('#loanForm button[type="submit"]').textContent = 'Update Loan';
+            document.getElementById('cancelLoanEdit').style.display = 'inline-block';
+        }
+        
+        async function deleteLoan(id) {
+            if (confirm('Delete this loan?')) {
+                await fetch(`${API_URL}/loans/${id}`, {method: 'DELETE'});
+                loadLoans();
+            }
+        }
+        
+        function clearLoanForm() {
+            document.getElementById('loanForm').reset();
+            document.getElementById('loanId').value = '';
+            document.querySelector('#loanForm button[type="submit"]').textContent = 'Add Loan';
+            document.getElementById('cancelLoanEdit').style.display = 'none';
+        }
+        
+        loadBooks();
+        loadBorrowers();
+        loadLoans();
+    </script>
+</body>
+</html>
