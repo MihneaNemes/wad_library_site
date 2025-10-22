@@ -256,7 +256,6 @@
             <table id="booksTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Title</th>
                         <th>Author</th>
                         <th>Actions</th>
@@ -295,7 +294,6 @@
             <table id="borrowersTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
@@ -347,7 +345,6 @@
             <table id="loansTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Book</th>
                         <th>Borrower</th>
                         <th>Due Date</th>
@@ -389,19 +386,16 @@
         function renderBooks() {
             const tbody = document.querySelector('#booksTable tbody');
             if (books.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No books available</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No books available</td></tr>';
                 return;
             }
             tbody.innerHTML = books.map(b => `
                 <tr>
-                    <td>${b.id}</td>
                     <td>${b.title}</td>
                     <td>${b.author}</td>
-                    <td>${b.genre || ''}</td>
-                    <td>${b.isbn || ''}</td>
                     <td class="actions">
-                        <button class="btn btn-edit" onclick="editBook(${b.id})">Edit</button>
-                        <button class="btn btn-danger" onclick="deleteBook(${b.id})">Delete</button>
+                        <button class="btn btn-edit" onclick="editBook('${b.id}')">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteBook('${b.id}')">Delete</button>
                     </td>
                 </tr>
             `).join('');
@@ -438,8 +432,6 @@
             document.getElementById('bookId').value = book.id;
             document.getElementById('bookTitle').value = book.title;
             document.getElementById('bookAuthor').value = book.author;
-            if (document.getElementById('bookGenre')) document.getElementById('bookGenre').value = book.genre || '';
-            if (document.getElementById('bookISBN')) document.getElementById('bookISBN').value = book.isbn || '';
             document.querySelector('#bookForm button[type="submit"]').textContent = 'Update Book';
             document.getElementById('cancelBookEdit').style.display = 'inline-block';
         }
@@ -468,18 +460,17 @@
         function renderBorrowers() {
             const tbody = document.querySelector('#borrowersTable tbody');
             if (borrowers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No borrowers available</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No borrowers available</td></tr>';
                 return;
             }
             tbody.innerHTML = borrowers.map(b => `
                 <tr>
-                    <td>${b.id}</td>
                     <td>${b.name}</td>
                     <td>${b.email}</td>
                     <td>${b.phone}</td>
                     <td class="actions">
-                        <button class="btn btn-edit" onclick="editBorrower(${b.id})">Edit</button>
-                        <button class="btn btn-danger" onclick="deleteBorrower(${b.id})">Delete</button>
+                        <button class="btn btn-edit" onclick="editBorrower('${b.id}')">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteBorrower('${b.id}')">Delete</button>
                     </td>
                 </tr>
             `).join('');
@@ -546,7 +537,7 @@
         function renderLoans() {
             const tbody = document.querySelector('#loansTable tbody');
             if (loans.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No loans available</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No loans available</td></tr>';
                 return;
             }
             tbody.innerHTML = loans.map(l => {
@@ -565,15 +556,14 @@
 
                 return `
                 <tr>
-                    <td>${l.id}</td>
                     <td>${book ? book.title : 'Unknown'}</td>
                     <td>${borrower ? borrower.name : 'Unknown'}</td>
                     <td>${l.due_date}</td>
                     <td>${l.return_date || 'Not returned'}</td>
                     <td><span class="status-badge status-${statusClass}">${statusText}</span></td>
                     <td class="actions">
-                        <button class="btn btn-edit" onclick="editLoan(${l.id})">Edit</button>
-                        <button class="btn btn-danger" onclick="deleteLoan(${l.id})">Delete</button>
+                        <button class="btn btn-edit" onclick="editLoan('${l.id}')">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteLoan('${l.id}')">Delete</button>
                     </td>
                 </tr>
             `}).join('');
@@ -601,11 +591,11 @@
             e.preventDefault();
             const id = document.getElementById('loanId').value;
             const data = {
-                book_id: parseInt(document.getElementById('loanBook').value),
-                borrower_id: parseInt(document.getElementById('loanBorrower').value),
+                book_id: document.getElementById('loanBook').value,
+                borrower_id: document.getElementById('loanBorrower').value,
                 due_date: document.getElementById('loanDueDate').value,
                 return_date: document.getElementById('loanReturnDate').value || null,
-                status: document.getElementById('loanStatus') ? document.getElementById('loanStatus').value : undefined
+                status: document.getElementById('loanStatus').value
             };
             
             if (id) {
@@ -633,7 +623,7 @@
             document.getElementById('loanBorrower').value = loan.borrower_id;
             document.getElementById('loanDueDate').value = loan.due_date;
             document.getElementById('loanReturnDate').value = loan.return_date || '';
-            if (document.getElementById('loanStatus')) document.getElementById('loanStatus').value = loan.status || 'Active';
+            document.getElementById('loanStatus').value = loan.status || 'Active';
             document.querySelector('#loanForm button[type="submit"]').textContent = 'Update Loan';
             document.getElementById('cancelLoanEdit').style.display = 'inline-block';
         }

@@ -1,0 +1,15 @@
+﻿# Ignore Firebase service account credentials and other sensitive files
+firebase-credentials.json
+*.key
+*.pem
+.env
+.env.*
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+env/
+
